@@ -1,6 +1,7 @@
 import Debug from 'debug';
 import { Command } from  '@chimpwizards/wand'
 import { Config } from '@chimpwizards/wand'
+import * as utils from '@chimpwizards/wand/Utils'
 import { CommandDefinition, CommandParameter, CommandArgument } from '@chimpwizards/wand/commons/command/'
 
 import * as fs from 'fs';
@@ -13,6 +14,7 @@ const debug = Debug("w:cli:workspace");
 @CommandDefinition({ 
     description: 'Create new workspace/project',
     alias: 'w',
+    parent: 'new',  //TODO: Get the parent from the folder structure
     examples: [
         [`new workspace`, `Create workspace in the current folder`],
         [`new workspace helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
@@ -32,8 +34,8 @@ export class Workspace extends Command  {
         debug(`THIS ${JSON.stringify(this)}`)
         debug(`YARGS ${JSON.stringify(yargs)}`)
         const config = new Config();
-        const context = config.load()
-        debug(`CONFIG ${JSON.stringify(context)}`)
+        
+        //debug(`CONFIG ${JSON.stringify(context)}`)
 
         //If name is not defined then use current folder as name
         let workspace = this.name;
@@ -47,7 +49,16 @@ export class Workspace extends Command  {
                 fs.mkdirSync(dir);
             }
         }
-        const fullPath = config.save( {dir: dir, context: {name: workspace}})
+        
+        const fullPath = config.save( {dir: dir, context: {name: workspace}, forceNew: true})
+
+        //If this new workspace is beein created inside other one
+        if (config.inContext()) {
+            const parentContext = config.load()
+            //Add the new folder into .gitignore
+            //Add the new folder as part of the dependencies of the parent
+        }
+        
         console.log(`Creating new workspace [${chalk.green(workspace)}] @ [${fullPath}]`)
 
     }
