@@ -3,3 +3,4 @@ node_modules
 .npmrc
 src/.wand
 src/packages
+dependencies/spells/workspace/xyz

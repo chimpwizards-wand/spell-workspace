@@ -18,6 +18,7 @@ const debug = Debug("w:cli:workspace");
         [`new workspace`, `Create workspace in the current folder`],
         [`new workspace helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
         [`new workspace --name helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
+        [`new workspace --name helloworld --git git@github.com:acme/helloworld.git `, `Create "helloworld" workspace in a new folder "helloworld" with preconfigured git repo`],
     ]
 })
 export class Workspace extends Command  { 
@@ -26,6 +27,9 @@ export class Workspace extends Command  {
     @CommandArgument({ description: 'Workspace Name', name: 'workspace-name'})
     @CommandParameter({ description: 'Workspace Name'})
     name: string = '';
+
+    @CommandParameter({ description: 'Git repository URI', defaults: ''})
+    git: string = "";
 
 
     execute(yargs: any): void {
@@ -59,15 +63,19 @@ export class Workspace extends Command  {
             //Add the new folder as part of the dependencies of the parent
             let location = dir.replace(parentContext.local.root+"/","")
             
-            let exists =  _.find(parentContext.dependencies, {path:path})
+            let exists =  _.find(parentContext.dependencies, {path:location})
             if (!exists) {
-                parentContext.dependencies.push({
+                let dependency: any = {
                     path: location,
                     tags: [
                         "workspace",
                         workspace
                     ]
-                })
+                }
+                if (this.git && this.git.length>0) {
+                    dependency['git'] = this.git;
+                }
+                parentContext.dependencies.push(dependency)
                 config.save( {context: parentContext} )
             }
 
