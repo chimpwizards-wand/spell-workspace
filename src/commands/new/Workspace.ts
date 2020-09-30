@@ -1,7 +1,6 @@
 import Debug from 'debug';
 import { Command } from  '@chimpwizards/wand'
 import { Config } from '@chimpwizards/wand'
-import * as utils from '@chimpwizards/wand/Utils'
 import { CommandDefinition, CommandParameter, CommandArgument } from '@chimpwizards/wand/commons/command/'
 
 import * as fs from 'fs';
@@ -44,7 +43,7 @@ export class Workspace extends Command  {
         if (!workspace|| workspace.length==0) {
             workspace = path.basename(process.cwd());
         } else {
-            dir = path.join('.', workspace);
+            dir = path.join(process.cwd(), workspace);
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir);
             }
@@ -53,10 +52,31 @@ export class Workspace extends Command  {
         const fullPath = config.save( {dir: dir, context: {name: workspace}, forceNew: true})
 
         //If this new workspace is beein created inside other one
-        if (config.inContext()) {
+        if (config.inContext({dir: process.cwd()})) {
+            debug(`UPDATE parent context`)
             const parentContext = config.load()
-            //Add the new folder into .gitignore
+
             //Add the new folder as part of the dependencies of the parent
+            let location = dir.replace(parentContext.local.root+"/","")
+            
+            let exists =  _.find(parentContext.dependencies, {path:path})
+            if (!exists) {
+                parentContext.dependencies.push({
+                    path: location,
+                    tags: [
+                        "workspace",
+                        workspace
+                    ]
+                })
+                config.save( {context: parentContext} )
+            }
+
+            //Add the new folder into .gitignore
+            let gitignore = path.join(process.cwd(),'.gitignore')
+            fs.appendFile(gitignore, '\n'+location, function (err) {
+                if (err) throw err;
+                debug(`Added to .gitignore`)
+            });
         }
         
         console.log(`Creating new workspace [${chalk.green(workspace)}] @ [${fullPath}]`)
