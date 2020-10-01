@@ -53,19 +53,19 @@ export class Workspace extends Command  {
         
         const fullPath = config.save( {dir: dir, context: {name: workspace}, forceNew: true})
 
-        //If this new workspace is beein created inside other one
+        debug(`If this new workspace is beein created inside other one link them together`)
         if (config.inContext({dir: process.cwd()})) {
             debug(`UPDATE parent context`)
             const parentContext = config.load()
 
-            //Add the new folder as part of the dependencies of the parent
-            //Keep path relative tot he root of the workspce
+            debug(`Add the new folder as part of the dependencies of the parent`)
+            debug(`Keep path relative tot he root of the workspce`)
             debug(`Current dir: ${dir}`)
             debug(`Context root: ${parentContext.local.root}`)
             let location = dir.replace(parentContext.local.root,"")
             debug(`Relative location: ${location}`)
 
-            // Check if workspace is already added into parent config
+            debug(`Check if workspace is already added into parent config`)
             let exists =  false;
             if (parentContext.dependencies) {
                 exists = _.find(parentContext.dependencies, {path:location})
@@ -74,7 +74,7 @@ export class Workspace extends Command  {
                 parentContext['dependencies'] = []
             }
 
-            // Add the new workspace inthe parent config if doesn't exists
+            debug(`Add the workspace to the current context if doesn't exists`)
             if (!exists) {
                 let dependency: any = {
                     path: location,
@@ -90,7 +90,7 @@ export class Workspace extends Command  {
                 config.save( {context: parentContext} )
             }
 
-            //Add the new folder into .gitignore
+            debug(`Add new workspace to the .gitignore of the current context`)
             let gitignore = path.join(process.cwd(),'.gitignore')
             fs.appendFile(gitignore, '\n'+location, function (err) {
                 if (err) throw err;
@@ -98,7 +98,7 @@ export class Workspace extends Command  {
             });
         }
         
-        console.log(`Creating new workspace [${chalk.green(workspace)}] @ [${fullPath}]`)
+        console.log(`Workspace [${chalk.green(workspace)}] created @ [${fullPath}]`)
 
     }
 
