@@ -59,7 +59,11 @@ export class Workspace extends Command  {
             const parentContext = config.load()
 
             //Add the new folder as part of the dependencies of the parent
-            let location = dir.replace(parentContext.local.root+"/","")
+            //Keep path relative tot he root of the workspce
+            debug(`Current dir: ${dir}`)
+            debug(`Context root: ${parentContext.local.root}`)
+            let location = dir.replace(parentContext.local.root,"")
+            debug(`Relative location: ${location}`)
 
             // Check if workspace is already added into parent config
             let exists =  false;
