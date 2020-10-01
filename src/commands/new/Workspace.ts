@@ -85,6 +85,9 @@ export class Workspace extends Command  {
                 }
                 if (this.git && this.git.length>0) {
                     dependency['git'] = this.git;
+
+                    //TODO: Initialize git repo
+                    //git remote add origin ${this.git}
                 }
                 parentContext.dependencies.push(dependency)
                 config.save( {context: parentContext} )

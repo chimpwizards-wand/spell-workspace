@@ -22,7 +22,7 @@ const debug = Debug("w:cli:dependency");
 export class Dependency extends Command  { 
 
     @CommandArgument({ description: 'Git repository URI', name: 'git-repository'})
-    @CommandParameter({ description: 'Git repository URI', defaults: ''})
+    @CommandParameter({ description: 'Git repository URI'})
     git: string = "";
 
 
