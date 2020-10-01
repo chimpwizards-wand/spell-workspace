@@ -27,7 +27,7 @@ export class Clone extends Command  {
     git: string = "";
 
     @CommandParameter({ description: 'Location'})
-    location: string = process.cwd();    
+    location: string= "";    
 
     execute(yargs: any): void {
         debug(`URL ${this.git}`)
@@ -38,13 +38,66 @@ export class Clone extends Command  {
             binary: 'git',
             maxConcurrentProcesses: 6,
          };
-        const git: SimpleGit = simpleGit(options);
+        const GIT: SimpleGit = simpleGit(options);
 
-        debug(`Clonign repo into ${this.location}`)
-        git.clone(this.git, this.location)
-            .then(() => console.log('finished'))
-            .catch((err) => console.error('failed: ', err));
+        let workspace = this.git.split("/").reverse()[0].replace(".git","");
+        let dir = (this.location.length==0)?path.join(process.cwd(),workspace):this.location;
+        debug(`WORKSPACE: ${workspace}`)
+        debug(`LOCATION: ${dir}`)
 
+        debug(`Clonign repo ${workspace} into ${dir}`)
+        GIT.clone(this.git, dir)
+            .then(() => console.log(`Repository ${workspace} has been cloned @ ${dir}`))
+            .catch((err) => {
+                debug(`ERROR: ${err}`)
+                console.error('failed: ', err)
+            });
+
+        //Add new workspace into existing one if needed
+        const config = new Config();
+        if (config.inContext({dir: process.cwd()})) {
+            debug(`UPDATE parent context`)
+            const parentContext = config.load()
+
+            debug(`Add the new folder as part of the dependencies of the parent`)
+            debug(`Keep path relative tot he root of the workspce`)
+            debug(`Current dir: ${dir}`)
+            debug(`Context root: ${parentContext.local.root}`)
+            let location = dir.replace(parentContext.local.root,"").slice(1) //Remove first stash/backstash
+            debug(`Relative location: ${location}`)
+
+            debug(`Check if workspace is already added into parent config`)
+            let exists =  false;
+            if (parentContext.dependencies) {
+                exists = _.find(parentContext.dependencies, {path:location})
+            } else {
+                debug(`Creating dependencies bucket in config`)
+                parentContext['dependencies'] = []
+            }
+
+            debug(`Add the workspace to the current context if doesn't exists`)
+            if (!exists) {
+                let dependency: any = {
+                    path: location,
+                    tags: [
+                        "workspace",
+                        workspace
+                    ]
+                }
+                if (this.git && this.git.length>0) {
+                    dependency['git'] = this.git;
+                }
+                parentContext.dependencies.push(dependency)
+                config.save( {context: parentContext} )
+            }
+
+            debug(`Add new workspace to the .gitignore of the current context`)
+            let gitignore = path.join(process.cwd(),'.gitignore')
+            fs.appendFile(gitignore, '\n'+location, function (err) {
+                if (err) throw err;
+                debug(`Added to .gitignore`)
+            });
+        }
     }
 
 }

@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 
 const chalk = require('chalk');
 const debug = Debug("w:cli:workspace");
+import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 @CommandDefinition({ 
     description: 'Create new workspace/project',
@@ -36,11 +37,12 @@ export class Workspace extends Command  {
         debug(`Workspace ${this.name}`)
         debug(`THIS ${JSON.stringify(this)}`)
         debug(`YARGS ${JSON.stringify(yargs)}`)
+
         const config = new Config();
         
         //If name is not defined then use current folder as name
         let workspace = this.name;
-        let dir = '.'
+        let dir = process.cwd()
 
         if (!workspace|| workspace.length==0) {
             workspace = path.basename(process.cwd());
@@ -86,8 +88,18 @@ export class Workspace extends Command  {
                 if (this.git && this.git.length>0) {
                     dependency['git'] = this.git;
 
-                    //TODO: Initialize git repo
-                    //git remote add origin ${this.git}
+                    debug(`Configure git cli`)
+                    const options: SimpleGitOptions = {
+                        baseDir: dir,
+                        binary: 'git',
+                        maxConcurrentProcesses: 6,
+                     };
+                    const GIT: SimpleGit = simpleGit(options);
+            
+                    debug(`Initialize git repo`)
+                    GIT.init()
+                        .then(() => GIT.addRemote('origin', this.git))
+
                 }
                 parentContext.dependencies.push(dependency)
                 config.save( {context: parentContext} )
