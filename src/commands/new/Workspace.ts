@@ -13,7 +13,7 @@ const debug = Debug("w:cli:workspace");
 @CommandDefinition({ 
     description: 'Create new workspace/project',
     alias: 'w',
-    parent: 'new',  //TODO: Get the parent from the folder structure
+    parent: 'new',  //TODO: Get the parent from the folder structure. This update should go into main core component
     examples: [
         [`new workspace`, `Create workspace in the current folder`],
         [`new workspace helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
