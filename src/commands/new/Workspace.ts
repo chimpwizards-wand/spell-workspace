@@ -75,6 +75,9 @@ export class Workspace extends Command  {
                 if (this.git && this.git.length>0) {
                     dependency['git'] = this.git;
                 }
+                if (!parentContext.dependencies) {
+                    parentContext['dependencies'] = []
+                }
                 parentContext.dependencies.push(dependency)
                 config.save( {context: parentContext} )
             }
