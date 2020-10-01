@@ -62,7 +62,7 @@ export class Workspace extends Command  {
             debug(`Keep path relative tot he root of the workspce`)
             debug(`Current dir: ${dir}`)
             debug(`Context root: ${parentContext.local.root}`)
-            let location = dir.replace(parentContext.local.root,"")
+            let location = dir.replace(parentContext.local.root,"").slice(1) //Remove first stash/backstash
             debug(`Relative location: ${location}`)
 
             debug(`Check if workspace is already added into parent config`)
