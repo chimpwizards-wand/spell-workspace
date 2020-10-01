@@ -28,7 +28,7 @@ export class Workspace extends Command  {
     @CommandParameter({ description: 'Workspace Name'})
     name: string = '';
 
-    @CommandParameter({ description: 'Git repository URI', defaults: ''})
+    @CommandParameter({ description: 'Git repository URI'})
     git: string = "";
 
 
