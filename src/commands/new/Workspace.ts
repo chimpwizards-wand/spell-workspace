@@ -38,8 +38,6 @@ export class Workspace extends Command  {
         debug(`YARGS ${JSON.stringify(yargs)}`)
         const config = new Config();
         
-        //debug(`CONFIG ${JSON.stringify(context)}`)
-
         //If name is not defined then use current folder as name
         let workspace = this.name;
         let dir = '.'
@@ -62,8 +60,17 @@ export class Workspace extends Command  {
 
             //Add the new folder as part of the dependencies of the parent
             let location = dir.replace(parentContext.local.root+"/","")
-            
-            let exists =  _.find(parentContext.dependencies, {path:location})
+
+            // Check if workspace is already added into parent config
+            let exists =  false;
+            if (parentContext.dependencies) {
+                exists = _.find(parentContext.dependencies, {path:location})
+            } else {
+                debug(`Creating dependencies bucket in config`)
+                parentContext['dependencies'] = []
+            }
+
+            // Add the new workspace inthe parent config if doesn't exists
             if (!exists) {
                 let dependency: any = {
                     path: location,
@@ -74,9 +81,6 @@ export class Workspace extends Command  {
                 }
                 if (this.git && this.git.length>0) {
                     dependency['git'] = this.git;
-                }
-                if (!parentContext.dependencies) {
-                    parentContext['dependencies'] = []
                 }
                 parentContext.dependencies.push(dependency)
                 config.save( {context: parentContext} )
