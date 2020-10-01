@@ -75,8 +75,8 @@ export class Clone extends Command  {
                 parentContext['dependencies'] = []
             }
 
-            debug(`Add the workspace to the current context if doesn't exists`)
             if (!exists) {
+                debug(`Add the workspace to the current context becase doesn't exists`)
                 let dependency: any = {
                     path: location,
                     tags: [

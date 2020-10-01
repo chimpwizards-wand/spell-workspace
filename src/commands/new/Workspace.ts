@@ -57,21 +57,27 @@ export class Workspace extends Command  {
         }
         
         let context: any = {name: workspace};
+
         if (this.git && this.git.length>0) {
+            debug(`Git is provided add metadata`)
             context['git'] = this.git;
         }
+
         if (this.organization && this.organization.length>0) {
+            debug(`Organization is provided add metadata`)
             context['organization'] = this.organization;
 
+
             if (!this.git || this.git.length == 0) {
+                debug(`Git is not provided add metadata based on the organization`)
                 this.git = this.organization + "/" + workspace
             }
         }
 
         const fullPath = config.save( {dir: dir, context: context, forceNew: true})
 
-        debug(`If this new workspace is beein created inside other one link them together`)
         if (config.inContext({dir: process.cwd()})) {
+            debug(`This new workspace is beein created inside other one link them together`)
             debug(`UPDATE parent context`)
             const parentContext = config.load()
 
@@ -91,8 +97,8 @@ export class Workspace extends Command  {
                 parentContext['dependencies'] = []
             }
 
-            debug(`Add the workspace to the current context if doesn't exists`)
             if (!exists) {
+                debug(`Add the workspace to the current context becase doesn't exists`)
                 let dependency: any = {
                     path: location,
                     tags: [
