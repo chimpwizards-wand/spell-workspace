@@ -32,6 +32,9 @@ export class Workspace extends Command  {
     @CommandParameter({ description: 'Git repository URI'})
     git: string = "";
 
+    @CommandParameter({ description: 'Git Origanization URI'})
+    organization: string = "";
+
 
     execute(yargs: any): void {
         debug(`Workspace ${this.name}`)
@@ -53,7 +56,19 @@ export class Workspace extends Command  {
             }
         }
         
-        const fullPath = config.save( {dir: dir, context: {name: workspace}, forceNew: true})
+        let context: any = {name: workspace};
+        if (this.git && this.git.length>0) {
+            context['git'] = this.git;
+        }
+        if (this.organization && this.organization.length>0) {
+            context['organization'] = this.organization;
+
+            if (!this.git || this.git.length == 0) {
+                this.git = this.organization + "/" + workspace
+            }
+        }
+
+        const fullPath = config.save( {dir: dir, context: context, forceNew: true})
 
         debug(`If this new workspace is beein created inside other one link them together`)
         if (config.inContext({dir: process.cwd()})) {
