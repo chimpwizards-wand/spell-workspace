@@ -9,6 +9,8 @@ import * as _ from 'lodash';
 
 const chalk = require('chalk');
 const debug = Debug("w:cli:workspace");
+import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
+
 
 @CommandDefinition({ 
     description: 'Clone existing workspace/project',
@@ -21,12 +23,27 @@ const debug = Debug("w:cli:workspace");
 export class Clone extends Command  { 
 
     
-    @CommandArgument({ description: 'Git repository URI', name: 'git-repository', required: true})
+    @CommandArgument({ description: 'Git repository URI', required: true})
     git: string = "";
 
+    @CommandParameter({ description: 'Location'})
+    location: string = process.cwd();    
 
     execute(yargs: any): void {
         debug(`URL ${this.git}`)
+        
+        debug(`Configure git cli`)
+        const options: SimpleGitOptions = {
+            baseDir: process.cwd(),
+            binary: 'git',
+            maxConcurrentProcesses: 6,
+         };
+        const git: SimpleGit = simpleGit(options);
+
+        debug(`Clonign repo into ${this.location}`)
+        git.clone(this.git, this.location)
+            .then(() => console.log('finished'))
+            .catch((err) => console.error('failed: ', err));
 
     }
 
