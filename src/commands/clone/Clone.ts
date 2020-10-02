@@ -11,8 +11,6 @@ const progress = require('cli-progress');
 const chalk = require('chalk');
 const debug = Debug("w:cli:workspace");
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
-import { clone } from 'lodash';
-
 
 @CommandDefinition({ 
     description: 'Clone existing workspace/project',
@@ -31,17 +29,19 @@ export class Clone extends Command  {
     @CommandParameter({ description: 'Location'})
     location: string= "";    
 
+    @CommandParameter({ description: 'Deep level', defaults: 5})
+    deepLevel: number= 5;   
+
     execute(yargs: any): void {
         debug(`URL ${this.git}`)
-        
-        this.cloneRepo(this.git, process.cwd())
+
+        let workspace = this.git.split("/").reverse()[0].replace(".git","");
+        this.cloneRepo(this.git, (this.location.length==0)?process.cwd():this.location, workspace)
     }
 
-    cloneRepo(git: string, location: string) {
-        debug(`Cloning repo ${git} into ${location}`)
-        let workspace = git.split("/").reverse()[0].replace(".git","");
-        let dir = (this.location.length==0)?path.join(location,workspace):this.location;
-        debug(`WORKSPACE: ${workspace}`)
+    cloneRepo(git: string, target: string, relativePath: string) {
+        debug(`Cloning repo ${git} into ${relativePath}`)
+        let dir = path.join(target,relativePath);
         debug(`LOCATION: ${dir}`)
 
         const repoExists = (fs.existsSync(dir));
@@ -55,35 +55,36 @@ export class Clone extends Command  {
 
         debug(`Configure git cli`)
         const options: SimpleGitOptions = {
-            baseDir: process.cwd(),
+            baseDir: target,
             binary: 'git',
             maxConcurrentProcesses: 6,
          };
         const GIT: SimpleGit = simpleGit(options);
 
-        debug(`Clonign repo ${workspace} into ${dir}`)
-        GIT.clone(this.git, dir)
+        debug(`Clonign repo ${git} into ${dir}`)
+        GIT.clone(git, dir)
             .then(() => {
-                console.log(`Repository ${workspace} has been cloned @ ${dir}`)
+                console.log(`Repository ${git} has been cloned @ ${dir}`)
 
-                const config = new Config();
+                let config = new Config();
 
                 debug(`Check if current folder belongs to a context`)
-                if (config.inContext({dir: process.cwd()})) {
+                if (config.inContext({dir: target})) {
                     debug(`Add new workspace into current one`)
-                    const parentContext = config.load({dir: dir})
+
+                    const parentContext = config.load({dir: target})   // Find near context
         
                     debug(`Add the new folder as part of the dependencies of the parent`)
                     debug(`Keep path relative tot he root of the workspce`)
                     debug(`Current dir: ${dir}`)
                     debug(`Context root: ${parentContext.local.root}`)
-                    let location = dir.replace(parentContext.local.root,"").slice(1) //Remove first stash/backstash
-                    debug(`Relative location: ${location}`)
+                    let parentRelativePath = dir.replace(parentContext.local.root,"").slice(1) //Remove first stash/backstash
+                    debug(`Relative location: ${parentRelativePath}`)
         
                     debug(`Check if workspace is already added into parent config`)
                     let exists =  false;
                     if (parentContext.dependencies) {
-                        exists = _.find(parentContext.dependencies, {path:location})
+                        exists = _.find(parentContext.dependencies, {path:parentRelativePath})
                     } else {
                         debug(`Creating dependencies bucket in config`)
                         parentContext['dependencies'] = []
@@ -92,39 +93,49 @@ export class Clone extends Command  {
                     if (!exists) {
                         debug(`Add the workspace to the current context becase doesn't exists`)
                         let dependency: any = {
-                            path: location,
-                            tags: [
-                                "workspace",
-                                workspace
-                            ]
+                            path: parentRelativePath,
                         }
-                        if (this.git && this.git.length>0) {
-                            dependency['git'] = this.git;
+                        dependency['tags'] =parentRelativePath.split("/")
+                        dependency['tags'].push("workspace")
+
+                        if (git && git.length>0) {
+                            dependency['git'] = git;
                         }
                         parentContext.dependencies.push(dependency)
                         config.save( {context: parentContext} )
+
+                        debug(`Add new workspace to the .gitignore of the current context`)
+                        let gitignore = path.join(process.cwd(),'.gitignore')
+                        fs.appendFile(gitignore, '\n'+parentRelativePath, function (err) {
+                            if (err) throw err;
+                            debug(`Added to .gitignore`)
+                        });
                     }
-        
-                    debug(`Add new workspace to the .gitignore of the current context`)
-                    let gitignore = path.join(process.cwd(),'.gitignore')
-                    fs.appendFile(gitignore, '\n'+location, function (err) {
-                        if (err) throw err;
-                        debug(`Added to .gitignore`)
-                    });
                 }
         
                 debug(`Check if new workspace has .wand config and pull all dependencies`)
                 if (config.inContext({dir: dir})) {
+                    debug(`Pull dependencies for new cloned repo`)
                     let newContext = config.load({dir: dir});
                     //If context its located in the new workspace location
-                    if (newContext.local.root == dir) {                
-                        this.cloneTree(dir)              
+                    debug(`NEW Context root: ${newContext.local.root}`)
+                    debug(`Workspace dir: ${dir}`)
+                    if (newContext.local.root == dir) {   
+                        this.deepLevel--;
+                        
+                        if (this.deepLevel>0) {
+                            this.cloneTree(dir)              
+                        } else {
+                            debug(`Deep level reached`)
+                            console.log(chalk.red(`Deep level reached.`));
+                            console.log(chalk.red(`Incerase it if you like to pull more levels of dependency`))
+                        }
                     }
                 }
             })
             .catch((err) => {
                 debug(`ERROR: ${err}`)
-                console.error('failed: ', err)
+                console.error(chalk.red(`failed:`), err)
             });
     }
 
@@ -149,10 +160,11 @@ export class Clone extends Command  {
             let dDir = path.join(dir, pack.path)
 
             if (!fs.existsSync(dDir)) {
-                fs.mkdirSync(dDir, {recursive: true});
+                let parent = path.dirname(dDir);
+                fs.mkdirSync(parent, {recursive: true});
             }
 
-            this.cloneRepo(pack.git,dDir)
+            this.cloneRepo(pack.git,dir, pack.path)
 
             bar.increment({dependency: pack.path});
 
