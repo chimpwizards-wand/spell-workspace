@@ -23,12 +23,13 @@
   },
   "dependencies": {
     "chalk": "^4.0.0",
+    "cli-progress": "^3.8.2",
     "debug": "^4.1.1",
     "lodash": "^4.17.15",
     "simple-git": "^2.20.1"
   },
   "devDependencies": {
-    "@chimpwizards/wand": "^1.0.24",
+    "@chimpwizards/wand": "^1.0.38",
     "@types/clear": "^0.1.0",
     "@types/debug": "^4.1.5",
     "@types/figlet": "^1.2.0",

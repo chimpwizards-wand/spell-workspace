@@ -79,7 +79,7 @@ export class Workspace extends Command  {
         if (config.inContext({dir: process.cwd()})) {
             debug(`This new workspace is beein created inside other one link them together`)
             debug(`UPDATE parent context`)
-            const parentContext = config.load()
+            const parentContext = config.load({})
 
             debug(`Add the new folder as part of the dependencies of the parent`)
             debug(`Keep path relative tot he root of the workspce`)
