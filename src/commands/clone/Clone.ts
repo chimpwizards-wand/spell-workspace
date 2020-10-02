@@ -11,6 +11,7 @@ const progress = require('cli-progress');
 const chalk = require('chalk');
 const debug = Debug("w:cli:workspace");
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
+import { clone } from 'lodash';
 
 
 @CommandDefinition({ 
@@ -33,16 +34,13 @@ export class Clone extends Command  {
     execute(yargs: any): void {
         debug(`URL ${this.git}`)
         
-        debug(`Configure git cli`)
-        const options: SimpleGitOptions = {
-            baseDir: process.cwd(),
-            binary: 'git',
-            maxConcurrentProcesses: 6,
-         };
-        const GIT: SimpleGit = simpleGit(options);
+        this.cloneRepo(this.git, process.cwd())
+    }
 
-        let workspace = this.git.split("/").reverse()[0].replace(".git","");
-        let dir = (this.location.length==0)?path.join(process.cwd(),workspace):this.location;
+    cloneRepo(git: string, location: string) {
+        debug(`Cloning repo ${git} into ${location}`)
+        let workspace = git.split("/").reverse()[0].replace(".git","");
+        let dir = (this.location.length==0)?path.join(location,workspace):this.location;
         debug(`WORKSPACE: ${workspace}`)
         debug(`LOCATION: ${dir}`)
 
@@ -55,6 +53,14 @@ export class Clone extends Command  {
             return
         }
 
+        debug(`Configure git cli`)
+        const options: SimpleGitOptions = {
+            baseDir: process.cwd(),
+            binary: 'git',
+            maxConcurrentProcesses: 6,
+         };
+        const GIT: SimpleGit = simpleGit(options);
+
         debug(`Clonign repo ${workspace} into ${dir}`)
         GIT.clone(this.git, dir)
             .then(() => {
@@ -65,7 +71,7 @@ export class Clone extends Command  {
                 debug(`Check if current folder belongs to a context`)
                 if (config.inContext({dir: process.cwd()})) {
                     debug(`Add new workspace into current one`)
-                    const parentContext = config.load({})
+                    const parentContext = config.load({dir: dir})
         
                     debug(`Add the new folder as part of the dependencies of the parent`)
                     debug(`Keep path relative tot he root of the workspce`)
@@ -123,6 +129,7 @@ export class Clone extends Command  {
     }
 
     cloneTree(dir: string) {
+        debug(`Cloaning tree ${dir}`)
         let config = new Config();
         let newContext = config.load({dir: dir});
         const bar = new progress.SingleBar({
@@ -145,32 +152,7 @@ export class Clone extends Command  {
                 fs.mkdirSync(dDir, {recursive: true});
             }
 
-
-            let dOptions: SimpleGitOptions = {
-                baseDir: dDir,
-                binary: 'git',
-                maxConcurrentProcesses: 6,
-                };
-            let dGIT: SimpleGit = simpleGit(dOptions);
-
-            
-            dGIT.clone(pack.git, dDir)
-                .then(() => {
-                    console.log(`Repository ${pack.path} has been cloned @ ${dir}`)
-
-                    if (config.inContext({dir: dDir})) {
-                        let newContext = config.load({dir: dDir});
-                        //If context its located in the new workspace location
-                        if (newContext.local.root == dDir) {                
-                            this.cloneTree(dDir)              
-                        }
-                    }
-
-                })
-                .catch((err) => {
-                    debug(`ERROR: ${err}`)
-                    console.error('failed: ', err)
-                });
+            this.cloneRepo(pack.git,dDir)
 
             bar.increment({dependency: pack.path});
 
