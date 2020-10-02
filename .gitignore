@@ -3,16 +3,4 @@ node_modules
 .npmrc
 src/.wand
 src/packages
-dependencies/spells/workspace/xyz
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wand
-dependencies/spells/workspace/wandpackage-lock.json
+package-lock.json
