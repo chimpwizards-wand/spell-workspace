@@ -117,10 +117,11 @@ export class Clone extends Command  {
                 if (config.inContext({dir: dir})) {
                     debug(`Pull dependencies for new cloned repo`)
                     let newContext = config.load({dir: dir});
-                    //If context its located in the new workspace location
+                    
                     debug(`NEW Context root: ${newContext.local.root}`)
                     debug(`Workspace dir: ${dir}`)
                     if (newContext.local.root == dir) {   
+                        debug(`Current context its located in the new workspace location`)
                         this.deepLevel--;
                         
                         if (this.deepLevel>0) {

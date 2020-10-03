@@ -6,6 +6,7 @@ import { CommandDefinition, CommandParameter, CommandArgument } from '@chimpwiza
 import * as fs from 'fs';
 import * as path from 'path';
 import * as _ from 'lodash';  
+import { Clone } from '../clone/Clone';
 
 const chalk = require('chalk');
 const debug = Debug("w:cli:dependency");
@@ -16,20 +17,11 @@ const debug = Debug("w:cli:dependency");
     parent: 'add',  //TODO: Get the parent from the folder structure
     examples: [
         [`add dependency git@github.com:acme/helloworld.git`, `Add dependency into current workspace`],
-        [`new dependency --git git@github.com:acme/helloworld.git `, `Add dependency into current workspace`],
+        [`add dependency --git git@github.com:acme/helloworld.git `, `Add dependency into current workspace`],
     ]
 })
-export class Dependency extends Command  { 
+export class Dependency extends Clone  { 
 
-    @CommandArgument({ description: 'Git repository URI', name: 'git-repository'})
-    @CommandParameter({ description: 'Git repository URI'})
-    git: string = "";
-
-
-    execute(yargs: any): void {
-        debug(`Git ${this.git}`)
-
-    }
 
 }
 
