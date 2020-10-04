@@ -26,10 +26,10 @@ export class Dependency extends Command  {
     @CommandParameter({ description: 'Dependency Name'})
     name: string = '';
 
-    @CommandParameter({ description: 'Location'})
+    @CommandParameter({ description: 'Location of the dependency. if not provided dependencies/<name> will be used'})
     location: string= "";    
 
-    @CommandParameter({ description: 'Git repository URI'})
+    @CommandParameter({ description: 'Git repository URI. If not provided will be calculated using the workspace organization'})
     git: string = "";
 
 
