@@ -1,0 +1,158 @@
+import Debug from 'debug';
+import { Command, Config } from  '@chimpwizards/wand'
+import { CommandDefinition, CommandParameter, CommandArgument } from '@chimpwizards/wand/commons/command/'
+
+import * as fs from 'fs';
+import * as path from 'path';
+import * as _ from 'lodash';  
+import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
+
+
+const chalk = require('chalk');
+const debug = Debug("w:cli:dependency:new");
+
+@CommandDefinition({ 
+    description: 'Create  a new dependency to the workspace',
+    alias: 'd',
+    parent: 'new',  //TODO: Get the parent from the folder structure
+    examples: [
+        [`new dependency helloworld`, `Creates a new dependency into current workspace`],
+        [`new dependency --git git@github.com:acme/helloworld.git `, `Creates a new dependency into current workspace`],
+    ]
+})
+export class Dependency extends Command  {
+
+    @CommandArgument({ description: 'Dependency Name', name: 'dependency-name'})
+    @CommandParameter({ description: 'Dependency Name'})
+    name: string = '';
+
+    @CommandParameter({ description: 'Location'})
+    location: string= "";    
+
+    @CommandParameter({ description: 'Git repository URI'})
+    git: string = "";
+
+
+    execute(yargs: any): void {
+        
+        debug(`Dependency ${this.name}`)
+        
+        debug(`THIS ${JSON.stringify(this)}`)
+        debug(`YARGS ${JSON.stringify(yargs)}`)
+
+        const config = new Config();
+        let context: any = config.load({})
+        
+        //If name is not defined then use current folder as name
+        let dependency = this.name;
+        
+
+        if (!dependency|| dependency.length==0) {
+
+            //Cannot create a dependency without name when located at the root of the workspace
+            if ( context.local.root == process.cwd()) {
+                console.log(chalk.red(`Dependency name needs to be provided`))
+                return;
+            }
+
+            //Assume current folder as name
+            dependency = path.basename(process.cwd());
+
+            //Set location
+            if (this.location.length==0){
+                let parent = path.dirname(process.cwd());
+                this.location = `${parent}/${dependency}`;
+                this.location = this.location.replace(context.local.root,"").slice(1)
+            }
+        } else {
+            //If name provided but location. Assume dependencies folder
+            if (this.location.length==0){
+                let parent = 'dependencies'
+                this.location = `${parent}/${dependency}`;                
+            }
+        }
+
+        
+        debug(`Name: ${dependency}`)        
+        debug(`Location ${this.location}`)
+        
+        
+        //If git not provided calculated from organization
+        if (this.git.length==0) {
+            if ( context.organization ) {
+                this.git = `${context.organization}/${context.name?context.name+'-':''}${dependency}.git`
+            } else {
+                console.log(chalk.red(`Git repository cannot be infered. Please provide`))
+            }
+
+        }
+
+        let exists =  false;
+        if (context.dependencies) {
+            exists = _.find(context.dependencies, {path: this.location})
+        } else {
+            debug(`Creating dependencies bucket in config`)  
+            context['dependencies'] = []  
+        }
+
+        if (exists) {
+            console.log(chalk.red(`Dependency ${this.name} already exists in ${this.location}`))
+            return
+        }
+
+        //Add metadata
+        let dependencyDefinition: any = {
+            path: this.location,
+            git: this.git,
+         }
+        dependencyDefinition['tags'] =this.location.split("/")
+        context.dependencies.push(dependencyDefinition)
+        config.save( {context:context} )
+
+
+        //Create folder
+        let dir = path.join(
+            context.local.root,
+            this.location
+        )
+        debug(`Dir: ${dir}`)
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, {recursive: true});
+        }
+
+        debug(`Configure git cli`)
+        const options: SimpleGitOptions = {
+            baseDir: dir,
+            binary: 'git',
+            maxConcurrentProcesses: 6,
+            };
+        const GIT: SimpleGit = simpleGit(options);
+
+        debug(`Initialize git repo`)
+        GIT.init()
+            .then(() => GIT.addRemote('origin', this.git))
+
+
+        debug(`Add new workspace to the .gitignore of the current context`)
+        let gitignore = path.join(context.local.root,'.gitignore')
+        fs.appendFile(gitignore, '\n'+this.location, function (err) {
+            if (err) throw err;
+            debug(`Added to .gitignore`)
+        });
+        
+        
+        console.log(`Dependency [${chalk.green(dependency)}] created @ [${this.location}]`)
+        process.chdir(dir)
+    } 
+
+
+}
+
+export function register ():any {
+    debug(`Registering....`)
+    let command = new Dependency();
+    debug(`INIT: ${JSON.stringify(Object.getOwnPropertyNames(command))}`)
+
+    return command.build()
+}
+
