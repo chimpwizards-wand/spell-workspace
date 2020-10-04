@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as _ from 'lodash';  
 
 const chalk = require('chalk');
-const debug = Debug("w:cli:workspace");
+const debug = Debug("w:cli:workspace:new");
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 @CommandDefinition({ 
@@ -134,6 +134,7 @@ export class Workspace extends Command  {
             });
         }
         
+        process.chdir(fullPath)
         console.log(`Workspace [${chalk.green(workspace)}] created @ [${fullPath}]`)
 
     }

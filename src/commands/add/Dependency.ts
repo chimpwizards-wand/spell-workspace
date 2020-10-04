@@ -9,7 +9,7 @@ import * as _ from 'lodash';
 import { Clone } from '../clone/Clone';
 
 const chalk = require('chalk');
-const debug = Debug("w:cli:dependency");
+const debug = Debug("w:cli:dependency:add");
 
 @CommandDefinition({ 
     description: 'Create add a new dependency to the workspace',

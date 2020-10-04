@@ -9,7 +9,7 @@ import * as _ from 'lodash';
 const progress = require('cli-progress');
 
 const chalk = require('chalk');
-const debug = Debug("w:cli:workspace");
+const debug = Debug("w:cli:workspace:clone");
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 @CommandDefinition({ 
