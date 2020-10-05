@@ -67,7 +67,7 @@ export class Dependency extends Command  {
         } else {
             //If name provided but location. Assume dependencies folder
             if (this.location.length==0){
-                let parent = 'dependencies'
+                let parent = context.dependenciesLocation || 'dependencies'
                 this.location = `${parent}/${dependency}`;                
             }
         }
