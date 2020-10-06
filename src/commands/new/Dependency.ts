@@ -142,7 +142,7 @@ export class Dependency extends Command  {
         
         
         console.log(`Dependency [${chalk.green(dependency)}] created @ [${this.location}]`)
-        process.chdir(dir)
+
     } 
 
 

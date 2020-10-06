@@ -134,7 +134,6 @@ export class Workspace extends Command  {
             });
         }
         
-        process.chdir(fullPath)
         console.log(`Workspace [${chalk.green(workspace)}] created @ [${fullPath}]`)
 
     }
