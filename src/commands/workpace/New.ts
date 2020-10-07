@@ -12,17 +12,17 @@ const debug = Debug("w:cli:workspace:new");
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 @CommandDefinition({ 
-    description: 'Create new workspace/project',
-    alias: 'w',
-    parent: 'new',  //TODO: Get the parent from the folder structure. This update should go into main core component
+    description: 'Create workspace new/project',
+    alias: 'n',
+    parent: 'workspace',  
     examples: [
-        [`new workspace`, `Create workspace in the current folder`],
-        [`new workspace helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
-        [`new workspace --name helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
-        [`new workspace --name helloworld --git git@github.com:acme/helloworld.git `, `Create "helloworld" workspace in a new folder "helloworld" with preconfigured git repo`],
+        [`w workspace new`, `Create workspace in the current folder`],
+        [`w workspace new helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
+        [`w workspace new --name helloworld`, `Create "helloworld" workspace in a new folder "helloworld"`],
+        [`w workspace new --name helloworld --git git@github.com:acme/helloworld.git `, `Create "helloworld" workspace in a new folder "helloworld" with preconfigured git repo`],
     ]
 })
-export class Workspace extends Command  { 
+export class New extends Command  { 
 
     
     @CommandArgument({ description: 'Workspace Name', name: 'workspace-name'})
@@ -77,7 +77,7 @@ export class Workspace extends Command  {
         const fullPath = config.save( {dir: dir, context: context, forceNew: true})
 
         if (config.inContext({dir: process.cwd()})) {
-            debug(`This new workspace is beein created inside other one link them together`)
+            debug(`This workspace new is beein created inside other one link them together`)
             debug(`UPDATE parent context`)
             const parentContext = config.load({})
 
@@ -126,7 +126,7 @@ export class Workspace extends Command  {
                 config.save( {context: parentContext} )
             }
 
-            debug(`Add new workspace to the .gitignore of the current context`)
+            debug(`Add workspace new to the .gitignore of the current context`)
             let gitignore = path.join(process.cwd(),'.gitignore')
             fs.appendFile(gitignore, '\n'+location, function (err) {
                 if (err) throw err;
@@ -142,7 +142,7 @@ export class Workspace extends Command  {
 
 export function register ():any {
     debug(`Registering....`)
-    let command = new Workspace();
+    let command = new New();
     debug(`INIT: ${JSON.stringify(Object.getOwnPropertyNames(command))}`)
 
     return command.build()

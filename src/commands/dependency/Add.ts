@@ -6,28 +6,28 @@ import { CommandDefinition, CommandParameter, CommandArgument } from '@chimpwiza
 import * as fs from 'fs';
 import * as path from 'path';
 import * as _ from 'lodash';  
-import { Clone } from '../clone/Clone';
+import { Clone } from '../workpace/Clone';
 
 const chalk = require('chalk');
 const debug = Debug("w:cli:dependency:add");
 
 @CommandDefinition({ 
     description: 'Create add a new dependency to the workspace',
-    alias: 'd',
-    parent: 'add',  //TODO: Get the parent from the folder structure
+    alias: 'a',
+    parent: 'dependency',  //TODO: Get the parent from the folder structure
     examples: [
-        [`add dependency git@github.com:acme/helloworld.git`, `Add dependency into current workspace`],
-        [`add dependency --git git@github.com:acme/helloworld.git `, `Add dependency into current workspace`],
+        [`w dependency add git@github.com:acme/helloworld.git`, `Add a dependency into current workspace`],
+        [`w dependency add --git git@github.com:acme/helloworld.git `, `Add a dependency into current workspace`],
     ]
 })
-export class Dependency extends Clone  { 
+export class Add extends Clone  { 
 
 
 }
 
 export function register ():any {
     debug(`Registering....`)
-    let command = new Dependency();
+    let command = new Add();
     debug(`INIT: ${JSON.stringify(Object.getOwnPropertyNames(command))}`)
 
     return command.build()

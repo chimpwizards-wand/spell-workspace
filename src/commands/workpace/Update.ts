@@ -2,7 +2,7 @@ import Debug from 'debug';
 import { Command } from  '@chimpwizards/wand'
 import { Config } from '@chimpwizards/wand'
 import { CommandDefinition, CommandParameter, CommandArgument } from '@chimpwizards/wand/commons/command/'
-import { Clone } from '../clone/Clone'
+import { Clone } from './Clone'
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,7 +18,7 @@ import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
     alias: 'u',
     parent: "workspace",
     examples: [
-        [`workspace clone git@github.com:acme/helloworld.git`, `Clone an existing workspace`],
+        [`w workspace update`, `Update current workspace`],
     ]
 })
 export class Update extends Command  { 
@@ -42,7 +42,7 @@ export class Update extends Command  {
         debug(`LOCATION: ${dir}`)
 
         const options: SimpleGitOptions = {
-            baseDir: target,
+            baseDir: dir,
             binary: 'git',
             maxConcurrentProcesses: 6,
          };
@@ -50,7 +50,7 @@ export class Update extends Command  {
         debug(`Update repo ${target}`)
         GIT.pull("origin","master")
             .then(() => {
-                console.log(`Repository has been updated @ ${target}`)
+                console.log(`Repository has been updated @ ${dir}`)
 
                 let config = new Config();
         
@@ -86,7 +86,7 @@ export class Update extends Command  {
         let config = new Config();
         let newContext = config.load({dir: dir});
         const bar = new progress.SingleBar({
-            format: 'Cloning |' + chalk.cyan('{bar}') + '| {percentage}% || {value}/{total} Dependencies || {dependency}',
+            format: 'Updating |' + chalk.cyan('{bar}') + '| {percentage}% || {value}/{total} Dependencies || {dependency}',
             barCompleteChar: '\u2588',
             barIncompleteChar: '\u2591',
             hideCursor: true

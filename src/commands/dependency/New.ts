@@ -12,15 +12,15 @@ const chalk = require('chalk');
 const debug = Debug("w:cli:dependency:new");
 
 @CommandDefinition({ 
-    description: 'Create  a new dependency to the workspace',
-    alias: 'd',
-    parent: 'new',  //TODO: Get the parent from the folder structure
+    description: 'Create  a new dependency into the current workspace',
+    alias: 'n',
+    parent: 'dependency',  //TODO: Get the parent from the folder structure
     examples: [
-        [`new dependency helloworld`, `Creates a new dependency into current workspace`],
-        [`new dependency --git git@github.com:acme/helloworld.git `, `Creates a new dependency into current workspace`],
+        [`w dependency new helloworld`, `Creates a new dependency into current workspace`],
+        [`w dependency new --git git@github.com:acme/helloworld.git `, `Creates a new dependency into current workspace`],
     ]
 })
-export class Dependency extends Command  {
+export class New extends Command  {
 
     @CommandArgument({ description: 'Dependency Name', name: 'dependency-name'})
     @CommandParameter({ description: 'Dependency Name'})
@@ -150,7 +150,7 @@ export class Dependency extends Command  {
 
 export function register ():any {
     debug(`Registering....`)
-    let command = new Dependency();
+    let command = new New();
     debug(`INIT: ${JSON.stringify(Object.getOwnPropertyNames(command))}`)
 
     return command.build()

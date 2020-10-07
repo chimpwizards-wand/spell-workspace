@@ -17,7 +17,7 @@ import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
     alias: 'c',
     parent: "workspace",
     examples: [
-        [`workspace clone git@github.com:acme/helloworld.git`, `Clone an existing workspace`],
+        [`w workspace clone git@github.com:acme/helloworld.git`, `Clone an existing workspace`],
     ]
 })
 export class Clone extends Command  { 
