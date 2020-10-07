@@ -10,7 +10,7 @@ import * as _ from 'lodash';
 const progress = require('cli-progress');
 
 const chalk = require('chalk');
-const debug = Debug("w:cli:workspace:clone");
+const debug = Debug("w:cli:workspace:update");
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 @CommandDefinition({ 
@@ -29,11 +29,17 @@ export class Update extends Command  {
     @CommandParameter({ description: 'Deep level', alias: 'd', defaults: 5})
     deepLevel: number= 5;   
 
+    @CommandParameter({ description: 'Include private components', alias: 'p', defaults: false})
+    includePrivates: boolean = false;  
+
     execute(yargs: any): void {
         debug(`THIS ${JSON.stringify(this)}`)
         debug(`YARGS ${JSON.stringify(yargs)}`)
 
-        this.updateRepo((this.location.length==0)?process.cwd():this.location,'')
+        let config = new Config();
+        let context = config.load({});
+
+        this.updateRepo((this.location.length==0)?context.local.root||process.cwd():this.location,'')
     }
 
     updateRepo(target: string, relativePath: string) {
@@ -85,6 +91,26 @@ export class Update extends Command  {
         debug(`Update tree ${dir}`)
         let config = new Config();
         let newContext = config.load({dir: dir});
+        
+
+        let dependencies: any = []
+        //Add dependencies
+        if (newContext.dependencies) {
+            _.each(newContext.dependencies||[], (pack, name) => {
+                let add: boolean = false;
+                if (!pack.visibility || _.lowerCase(pack.visibility) == "public") {
+                    add = true;
+                } 
+                if (pack.visibility && _.lowerCase(pack.visibility) == "private" && this.includePrivates) {
+                    add = true;
+                }
+                if (add) {
+                    dependencies.push(pack)
+                }
+            })
+        
+        }  
+
         const bar = new progress.SingleBar({
             format: 'Updating |' + chalk.cyan('{bar}') + '| {percentage}% || {value}/{total} Dependencies || {dependency}',
             barCompleteChar: '\u2588',
@@ -92,21 +118,20 @@ export class Update extends Command  {
             hideCursor: true
         });
 
-        bar.start(newContext.dependencies.length, 0, {
+        bar.start(dependencies.length, 0, {
             dependency: "Preparing"
         });
-
-        _.each(newContext.dependencies, (pack) => {
-            debug(`Cloning (${pack.path})`)
-            
+        _.each(dependencies, (pack) => {
             let dDir = path.join(dir, pack.path)
-
+            
+            debug(`Updating (${pack.path})`)
             if (fs.existsSync(dDir)) {
                 this.updateRepo(dir, pack.path)
             } else {
                 let clone = new Clone()
                 clone.cloneRepo(pack.git,dir, pack.path)
             }
+            
             bar.increment({dependency: pack.path});
 
         });

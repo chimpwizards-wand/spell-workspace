@@ -32,6 +32,9 @@ export class Clone extends Command  {
     @CommandParameter({ description: 'Deep level', alias: 'd', defaults: 5})
     deepLevel: number= 5;   
 
+    @CommandParameter({ description: 'Include private components', alias: 'p', defaults: false})
+    includePrivates: boolean = false;      
+
     execute(yargs: any): void {
         debug(`URL ${this.git}`)
 
@@ -144,6 +147,25 @@ export class Clone extends Command  {
         debug(`Cloaning tree ${dir}`)
         let config = new Config();
         let newContext = config.load({dir: dir});
+
+        let dependencies: any = []
+        //Add dependencies
+        if (newContext.dependencies) {
+            _.each(newContext.dependencies||[], (pack, name) => {
+                let add: boolean = false;
+                if (!pack.visibility || _.lowerCase(pack.visibility) == "public") {
+                    add = true;
+                } 
+                if (pack.visibility && _.lowerCase(pack.visibility) == "private" && this.includePrivates) {
+                    add = true;
+                }
+                if (add) {
+                    dependencies.push(pack)
+                }
+            })
+        
+        } 
+
         const bar = new progress.SingleBar({
             format: 'Cloning |' + chalk.cyan('{bar}') + '| {percentage}% || {value}/{total} Dependencies || {dependency}',
             barCompleteChar: '\u2588',
@@ -151,21 +173,21 @@ export class Clone extends Command  {
             hideCursor: true
         });
 
-        bar.start(newContext.dependencies.length, 0, {
+        bar.start(dependencies.length, 0, {
             dependency: "Preparing"
         });
 
-        _.each(newContext.dependencies, (pack) => {
-            debug(`Cloning (${pack.path})`)
-            
+        _.each(dependencies, (pack) => {
             let dDir = path.join(dir, pack.path)
 
+            debug(`Cloning (${pack.path})`)
             if (!fs.existsSync(dDir)) {
                 let parent = path.dirname(dDir);
                 fs.mkdirSync(parent, {recursive: true});
             }
 
             this.cloneRepo(pack.git,dir, pack.path)
+            
 
             bar.increment({dependency: pack.path});
 
