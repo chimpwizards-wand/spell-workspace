@@ -23,10 +23,10 @@ import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 })
 export class Update extends Command  { 
 
-    @CommandParameter({ description: 'Location'})
+    @CommandParameter({ description: 'Location', alias: 'l'})
     location: string= "";   
 
-    @CommandParameter({ description: 'Deep level', defaults: 5})
+    @CommandParameter({ description: 'Deep level', alias: 'd', defaults: 5})
     deepLevel: number= 5;   
 
     execute(yargs: any): void {

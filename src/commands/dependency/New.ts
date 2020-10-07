@@ -23,13 +23,13 @@ const debug = Debug("w:cli:dependency:new");
 export class New extends Command  {
 
     @CommandArgument({ description: 'Dependency Name', name: 'dependency-name'})
-    @CommandParameter({ description: 'Dependency Name'})
+    @CommandParameter({ description: 'Dependency Name', alias: 'n',})
     name: string = '';
 
-    @CommandParameter({ description: 'Location of the dependency. if not provided dependencies/<name> will be used'})
+    @CommandParameter({ description: 'Location of the dependency. if not provided dependencies/<name> will be used', alias: 'l',})
     location: string= "";    
 
-    @CommandParameter({ description: 'Git repository URI. If not provided will be calculated using the workspace organization'})
+    @CommandParameter({ description: 'Git repository URI. If not provided will be calculated using the workspace organization', alias: 'g',})
     git: string = "";
 
 

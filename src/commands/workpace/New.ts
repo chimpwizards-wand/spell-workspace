@@ -26,13 +26,13 @@ export class New extends Command  {
 
     
     @CommandArgument({ description: 'Workspace Name', name: 'workspace-name'})
-    @CommandParameter({ description: 'Workspace Name'})
+    @CommandParameter({ description: 'Workspace Name', alias: 'n',})
     name: string = '';
 
-    @CommandParameter({ description: 'Git repository URI'})
+    @CommandParameter({ description: 'Git repository URI', alias: 'g',})
     git: string = "";
 
-    @CommandParameter({ description: 'Git Origanization URI'})
+    @CommandParameter({ description: 'Git Origanization URI', alias: 'o',})
     organization: string = "";
 
 

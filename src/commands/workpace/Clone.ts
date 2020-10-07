@@ -17,7 +17,7 @@ import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
     alias: 'c',
     parent: "workspace",
     examples: [
-        [`w workspace clone git@github.com:acme/helloworld.git`, `Clone an existing workspace`],
+        [`wworkspace clone git@github.com:acme/helloworld.git`, `Clone an existing workspace`],
     ]
 })
 export class Clone extends Command  { 
@@ -26,10 +26,10 @@ export class Clone extends Command  {
     @CommandArgument({ description: 'Git repository URI', required: true})
     git: string = "";
 
-    @CommandParameter({ description: 'Location'})
+    @CommandParameter({ description: 'Location', alias: 'l',})
     location: string= "";    
 
-    @CommandParameter({ description: 'Deep level', defaults: 5})
+    @CommandParameter({ description: 'Deep level', alias: 'd', defaults: 5})
     deepLevel: number= 5;   
 
     execute(yargs: any): void {
