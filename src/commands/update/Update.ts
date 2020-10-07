@@ -102,7 +102,7 @@ export class Update extends Command  {
             let dDir = path.join(dir, pack.path)
 
             if (fs.existsSync(dDir)) {
-                this.updateRepo(dDir, pack.path)
+                this.updateRepo(dir, pack.path)
             } else {
                 let clone = new Clone()
                 clone.cloneRepo(pack.git,dir, pack.path)
