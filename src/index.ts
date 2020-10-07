@@ -5,3 +5,4 @@ export * as p3 from './commands/dependency/New';
 export * as p4 from './commands/dependency/Add';
 export * as p5 from './commands/workpace/Clone';
 export * as p6 from './commands/workpace/Update';
+export * as p7 from './commands/workpace/Init';
