@@ -20,8 +20,23 @@ const debug = Debug("w:cli:dependency:add");
         [`w dependency add --git git@github.com:acme/helloworld.git `, `Add a dependency into current workspace`],
     ]
 })
-export class Add extends Clone  { 
+export class Add extends Command  { 
 
+    @CommandParameter({ description: 'Location of the dependency. if not provided dependencies/<name> will be used', alias: 'l',})
+    location: string= "";    
+
+    @CommandParameter({ description: 'Git repository URI. If not provided will be calculated using the workspace organization', alias: 'g',})
+    git: string = "";
+
+    execute(yargs: any): void {
+        debug(`URL ${this.git}`)
+
+        let workspace = this.git.split("/").reverse()[0].replace(".git","");
+        let clone = new Clone();
+        clone.git = this.git;
+        clone.location = this.location;
+        clone.cloneRepo(this.git, (this.location.length==0)?process.cwd():this.location, workspace)
+    }
 
 }
 

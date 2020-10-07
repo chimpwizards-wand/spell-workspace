@@ -32,6 +32,9 @@ export class New extends Command  {
     @CommandParameter({ description: 'Git repository URI. If not provided will be calculated using the workspace organization', alias: 'g',})
     git: string = "";
 
+    @CommandParameter({ description: 'Type of visibility this repo has [private|public]', alias: 'v',})
+    visibility: string = "";
+
 
     execute(yargs: any): void {
         
@@ -45,8 +48,6 @@ export class New extends Command  {
         
         //If name is not defined then use current folder as name
         let dependency = this.name;
-        
-
         if (!dependency|| dependency.length==0) {
 
             //Cannot create a dependency without name when located at the root of the workspace
@@ -104,7 +105,12 @@ export class New extends Command  {
         let dependencyDefinition: any = {
             path: this.location,
             git: this.git,
-         }
+        }
+
+        //Add visibility
+        if (this.visibility && this.visibility.length > 0) {
+            dependencyDefinition['visibility'] = this.visibility;
+        }
         dependencyDefinition['tags'] =this.location.split("/")
         context.dependencies.push(dependencyDefinition)
         config.save( {context:context} )
