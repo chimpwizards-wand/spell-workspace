@@ -4,3 +4,4 @@ node_modules
 src/.wand
 src/packages
 package-lock.json
+.wand
