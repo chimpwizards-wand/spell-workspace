@@ -14,8 +14,8 @@ const debug = Debug("w:cli:workspace:clone");
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 @CommandDefinition({ 
-    description: 'Clone existing workspace/project',
-    alias: 'c',
+    description: 'Update current workspace/project',
+    alias: 'u',
     parent: "workspace",
     examples: [
         [`workspace clone git@github.com:acme/helloworld.git`, `Clone an existing workspace`],
