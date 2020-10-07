@@ -21,7 +21,9 @@ import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 })
 export class Init extends Command  { 
 
-    
+    @CommandParameter({ description: 'Git Origanization URI', alias: 'o',})
+    organization: string = "";
+
     execute(yargs: any): void {
         debug(`THIS ${JSON.stringify(this)}`)
         debug(`YARGS ${JSON.stringify(yargs)}`)
@@ -47,11 +49,18 @@ export class Init extends Command  {
         const GIT: SimpleGit = simpleGit(options);
         GIT.getRemotes().then( (remotes) => {
             debug(`Remotes: ${JSON.stringify(remotes)}`)
+
             context = {
                 name: workspace
-                //git
-                //organization
+                //git: TODO: Take it from the remote
+                //organization: TODO: Take it from the remote
             };
+
+            if (this.organization && this.organization.length>0) {
+                debug(`Organization is provided add/update metadata`)
+                context['organization'] = this.organization;
+            }
+
 
             const fullPath = config.save( {dir: dir, context: context, forceNew: true})
 
