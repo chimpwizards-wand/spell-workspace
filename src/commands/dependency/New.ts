@@ -18,6 +18,7 @@ const debug = Debug("w:cli:dependency:new");
     examples: [
         [`w dependency new helloworld`, `Creates a new dependency into current workspace`],
         [`w dependency new --git git@github.com:acme/helloworld.git `, `Creates a new dependency into current workspace`],
+        [`w dependency new --name helloworld`, `Creates a new dependency into current workspace and gives helloworld as name`],
     ]
 })
 export class New extends Command  {
