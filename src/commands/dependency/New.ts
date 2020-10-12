@@ -81,7 +81,7 @@ export class New extends Command  {
         //If git not provided calculated from organization
         if (this.git.length==0) {
             if ( context.organization ) {
-                this.git = `${context.organization}/${context.name?context.name+'-':''}${dependency}.git`
+                this.git = `${context.organization}/${context.name?context.name+'-':''}${dependency}`
             } else {
                 console.log(chalk.red(`Git repository cannot be infered. Please provide`))
             }

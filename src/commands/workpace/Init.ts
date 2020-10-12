@@ -21,6 +21,9 @@ import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 })
 export class Init extends Command  { 
 
+    @CommandParameter({ description: 'Workspace name', alias: 'n',})
+    name: string = "";
+
     @CommandParameter({ description: 'Git Origanization URI', alias: 'o',})
     organization: string = "";
 
@@ -38,7 +41,7 @@ export class Init extends Command  {
         }
 
         //If name is not defined then use current folder as name
-        let workspace = path.basename(process.cwd());
+        let workspace = this.name || path.basename(process.cwd());
         debug(`Workspace: ${workspace}`)
 
 
