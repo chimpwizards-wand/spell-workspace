@@ -32,13 +32,14 @@ export class Init extends Command  {
         let context: any = config.load({})
         let dir = process.cwd()
 
-        if (context.local.root == dir) {
+        if (context && context.local && context.local.root == dir) {
             console.log(chalk.red(`WAND configuration already exists here`))
             return;
         }
 
         //If name is not defined then use current folder as name
         let workspace = path.basename(process.cwd());
+        debug(`Workspace: ${workspace}`)
 
 
         const options: SimpleGitOptions = {
@@ -46,27 +47,50 @@ export class Init extends Command  {
             binary: 'git',
             maxConcurrentProcesses: 6,
          };
+         
         const GIT: SimpleGit = simpleGit(options);
-        GIT.getRemotes().then( (remotes) => {
-            debug(`Remotes: ${JSON.stringify(remotes)}`)
 
-            context = {
-                name: workspace
-                //git: TODO: Take it from the remote
-                //organization: TODO: Take it from the remote
-            };
+        //check if .git folder exists
+        let gitpath: string = path.join(
+            process.cwd(),
+            '.git'
+        );
 
-            if (this.organization && this.organization.length>0) {
-                debug(`Organization is provided add/update metadata`)
-                context['organization'] = this.organization;
-            }
+        if (!fs.existsSync(gitpath)) {
+            debug(`Initialize .git folder `)
+            let giturl = this.organization + "/" + workspace;
+            GIT.init().then(() => {
+                    GIT.addRemote('origin', giturl);
+                    this.initializeWand(workspace, dir);
+            })
+        } else {
+
+            debug(`Get remote folders`)
+            GIT.getRemotes().then( (remotes) => {
+                debug(`Remotes: ${JSON.stringify(remotes)}`)
+                this.initializeWand(workspace, dir)
+            });
+        }
+
+    }
+
+    initializeWand(workspace: string, dir: string) {
+        const config = new Config();
+        let context: any = {
+            name: workspace
+            //git: TODO: Take it from the remote
+            //organization: TODO: Take it from the remote
+        };
+
+        if (this.organization && this.organization.length>0) {
+            debug(`Organization is provided add/update metadata`)
+            context['organization'] = this.organization;
+        }
 
 
-            const fullPath = config.save( {dir: dir, context: context, forceNew: true})
+        const fullPath = config.save( {dir: dir, context: context, forceNew: true})
 
-            console.log(`Workspace [${chalk.green(workspace)}] created @ [${fullPath}]`)
-        });
-
+        console.log(`Workspace [${chalk.green(workspace)}] created @ [${fullPath}]`)
     }
 
 }

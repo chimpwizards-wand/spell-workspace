@@ -8,6 +8,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Initial release
 
+## [2.0.46] - 2020.10.07
+
 ## [2.0.45] - 2020.10.07
 
 ### Added
