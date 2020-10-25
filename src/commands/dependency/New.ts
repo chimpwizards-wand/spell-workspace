@@ -36,6 +36,8 @@ export class New extends Command  {
     @CommandParameter({ description: 'Type of visibility this repo has [private|public]', alias: 'v',})
     visibility: string = "";
 
+    @CommandParameter({ description: 'Prefix the git repository with the contet name', alias: 'p', defaults: false})
+    prefix: boolean = false;
 
     execute(yargs: any): void {
         
@@ -82,7 +84,7 @@ export class New extends Command  {
         //If git not provided calculated from organization
         if (this.git.length==0) {
             if ( context.organization ) {
-                this.git = `${context.organization}/${context.name?context.name+'-':''}${dependency}`
+                this.git = `${context.organization}/${(context.name && this.prefix)?context.name+'-':''}${dependency}`
             } else {
                 console.log(chalk.red(`Git repository cannot be infered. Please provide`))
             }
