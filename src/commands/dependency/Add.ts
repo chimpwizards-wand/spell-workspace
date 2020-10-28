@@ -12,7 +12,7 @@ const chalk = require('chalk');
 const debug = Debug("w:cli:dependency:add");
 
 @CommandDefinition({ 
-    description: 'Create add a new dependency to the workspace',
+    description: 'Add an existing dependency to the workspace',
     alias: 'a',
     parent: 'dependency',  //TODO: Get the parent from the folder structure
     examples: [
