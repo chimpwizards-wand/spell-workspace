@@ -54,7 +54,8 @@ export class Update extends Command  {
          };
         const GIT: SimpleGit = simpleGit(options);
         debug(`Update repo ${target}`)
-        GIT.pull("origin","master")
+        //GIT.pull("origin","master")
+        GIT.pull()
             .then(() => {
                 console.log(`Repository has been updated @ ${dir}`)
 
