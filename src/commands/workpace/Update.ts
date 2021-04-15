@@ -51,10 +51,10 @@ export class Update extends Command  {
             baseDir: dir,
             binary: 'git',
             maxConcurrentProcesses: 6,
+            config: []
          };
         const GIT: SimpleGit = simpleGit(options);
         debug(`Update repo ${target}`)
-        //GIT.pull("origin","master")
         GIT.pull()
             .then(() => {
                 console.log(`Repository has been updated @ ${dir}`)
