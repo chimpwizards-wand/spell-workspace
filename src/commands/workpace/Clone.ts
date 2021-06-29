@@ -82,7 +82,12 @@ export class Clone extends Command  {
                     debug(`Keep path relative tot he root of the workspce`)
                     debug(`Current dir: ${dir}`)
                     debug(`Context root: ${parentContext.local.root}`)
-                    let parentRelativePath = dir.replace(parentContext.local.root,"").slice(1) //Remove first stash/backstash
+                    
+                    var parentRelativePath = dir.replace(parentContext.local.root,"")
+                    if (parentRelativePath.startsWith("/")) {
+                        parentRelativePath = parentRelativePath.slice(1) //Remove first stash/backstash
+                    }
+
                     debug(`Relative location: ${parentRelativePath}`)
         
                     debug(`Check if workspace is already added into parent config`)
