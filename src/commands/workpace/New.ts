@@ -35,6 +35,9 @@ export class New extends Command  {
     @CommandParameter({ description: 'Git Origanization URI', alias: 'o',})
     organization: string = "";
 
+    @CommandParameter({ description: 'Location to keep the new components', alias: 'l',})
+    location: string = "";
+
 
     execute(yargs: any): void {
         debug(`Workspace ${this.name}`)
@@ -44,7 +47,7 @@ export class New extends Command  {
         const config = new Config();
         
         //If name is not defined then use current folder as name
-        let workspace = this.name;
+        let workspace = path.join(this.location,this.name);
         let dir = process.cwd()
 
         if (!workspace|| workspace.length==0) {
@@ -85,7 +88,12 @@ export class New extends Command  {
             debug(`Keep path relative tot he root of the workspce`)
             debug(`Current dir: ${dir}`)
             debug(`Context root: ${parentContext.local.root}`)
-            let location = dir.replace(parentContext.local.root,"").slice(1) //Remove first stash/backstash
+
+            var location = dir.replace(parentContext.local.root,"") 
+            if (location.startsWith("/")) {
+                location = location.slice(1) //Remove first stash/backstash
+            }
+
             debug(`Relative location: ${location}`)
 
             debug(`Check if workspace is already added into parent config`)
