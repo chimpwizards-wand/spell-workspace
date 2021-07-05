@@ -34,7 +34,7 @@ export class Add extends Command  {
         let workspace = this.git.split("/").reverse()[0].replace(".git","");
         let clone = new Clone();
         clone.git = this.git;
-        clone.location = this.location;
+        clone.location = this.location || 'dependencies';
         clone.cloneRepo(this.git, (this.location.length==0)?process.cwd():this.location, workspace)
     }
 

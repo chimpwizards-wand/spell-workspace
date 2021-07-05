@@ -49,7 +49,7 @@ export class Init extends Command  {
             baseDir: dir,
             binary: 'git',
             maxConcurrentProcesses: 6,
-            config: []
+            //config: []
          };
          
         const GIT: SimpleGit = simpleGit(options);

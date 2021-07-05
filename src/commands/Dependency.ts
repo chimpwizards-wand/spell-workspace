@@ -15,7 +15,7 @@ export class Dependency extends Command  {
     execute(yargs: any): void {
         debug(`Do Nothing`)
         const executer = new Execute();
-        let cmd = `w w dependency --help`;
+        let cmd = `w dependency --help`;
         executer.run({cmd: cmd, showLog: false})
     } 
 

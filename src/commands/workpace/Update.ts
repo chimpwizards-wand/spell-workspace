@@ -47,45 +47,71 @@ export class Update extends Command  {
         let dir = path.join(target,relativePath);
         debug(`LOCATION: ${dir}`)
 
-        const options: SimpleGitOptions = {
-            baseDir: dir,
-            binary: 'git',
-            maxConcurrentProcesses: 6,
-            config: []
-         };
-        const GIT: SimpleGit = simpleGit(options);
-        debug(`Update repo ${target}`)
-        GIT.pull()
-            .then(() => {
-                console.log(`Repository has been updated @ ${dir}`)
+        const isGitPresent = (fs.existsSync(path.join(dir,'.git')));
+        if (isGitPresent) {
+            debug(`GIT present @ ${dir}`)
 
-                let config = new Config();
-        
-                debug(`Check if updated repo is a workspace and pull all dependencies`)
-                if (config.inContext({dir: dir})) {
-                    debug(`Pull dependencies for  repo`)
-                    let newContext = config.load({dir: dir});
-                    
-                    debug(`Context root: ${newContext.local.root}`)
-                    debug(`Workspace dir: ${dir}`)
-                    if (newContext.local.root == dir) {   
-                        debug(`Current context its located in the new workspace location`)
-                        this.deepLevel--;
-                        
-                        if (this.deepLevel>0) {
-                            this.updateTree(dir)              
-                        } else {
-                            debug(`Deep level reached`)
-                            console.log(chalk.red(`Deep level reached.`));
-                            console.log(chalk.red(`Incerase it if you like to pull more levels of dependency`))
-                        }
-                    }
+            const options: SimpleGitOptions = {
+                baseDir: dir,
+                binary: 'git',
+                maxConcurrentProcesses: 6,
+                //config: []
+            };
+            const GIT: SimpleGit = simpleGit(options);
+
+            GIT.getRemotes(true).then( (remotes) => {
+                debug(`Remotes: ${JSON.stringify(remotes)}`)
+                var originURL = remotes.find(x => x.name == "origin")
+
+                if ( originURL && originURL?.refs?.fetch != "") {
+    
+                    debug(`Update repo ${target}`)
+                    GIT.pull()
+                        .then(() => {
+                            console.log(`Repository has been updated @ ${dir}`)
+
+                            this.updateDependencies(dir)
+                        })
+                        .catch((err) => {
+                            debug(`ERROR: ${err}`)
+                            console.error(chalk.red(`failed:`), err)
+                        });
+                } else {
+                    debug(`GIT remote is not set @ ${dir}`)
                 }
-            })
-            .catch((err) => {
-                debug(`ERROR: ${err}`)
-                console.error(chalk.red(`failed:`), err)
             });
+        } else {
+            debug(`GIT IS NOT present @ ${dir}`)
+            debug(`${target}/.git folder doesn't exists`)
+            console.log(chalk.red(`.git Folder doesn't exists. It might be becase the git has not been initialized.`))
+
+            this.updateDependencies(dir)
+            
+        }
+    }
+
+    updateDependencies(dir:string) {
+        let config = new Config();
+        debug(`Check if updated repo is a workspace and pull all dependencies`)
+        if (config.inContext({dir: dir})) {
+            debug(`Pull dependencies for  repo`)
+            let newContext = config.load({dir: dir});
+            
+            debug(`Context root: ${newContext.local.root}`)
+            debug(`Workspace dir: ${dir}`)
+            if (newContext.local.root == dir) {   
+                debug(`Current context its located in the new workspace location`)
+                this.deepLevel--;
+                
+                if (this.deepLevel>0) {
+                    this.updateTree(dir)              
+                } else {
+                    debug(`Deep level reached`)
+                    console.log(chalk.red(`Deep level reached.`));
+                    console.log(chalk.red(`Incerase it if you like to pull more levels of dependency`))
+                }
+            }
+        }
     }
 
     updateTree(dir: string) {
