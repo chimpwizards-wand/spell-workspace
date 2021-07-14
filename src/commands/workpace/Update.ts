@@ -33,7 +33,7 @@ export class Update extends Command  {
     includePrivates: boolean = false;  
 
     execute(yargs: any): void {
-        debug(`THIS ${JSON.stringify(this)}`)
+        //debug(`THIS ${JSON.stringify(this)}`)
         debug(`YARGS ${JSON.stringify(yargs)}`)
 
         let config = new Config();

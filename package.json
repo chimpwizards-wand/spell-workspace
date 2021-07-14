@@ -19,7 +19,7 @@
   "author": "ndru@chimpwizard.com",
   "license": "MIT",
   "peerDependencies": {
-    "@chimpwizards/wand": "@chimpwizards/wand"
+    "@chimpwizards/wand": "^1.0.0"
   },
   "dependencies": {
     "chalk": "^4.0.0",
