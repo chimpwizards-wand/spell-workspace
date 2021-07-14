@@ -73,8 +73,9 @@ export class Update extends Command  {
                             this.updateDependencies(dir)
                         })
                         .catch((err) => {
+                            console.log(`Error updating repository @ ${dir}. Enable debugging [w:cli:workspace:update] to see error details`)
                             debug(`ERROR: ${err}`)
-                            console.error(chalk.red(`failed:`), err)
+                            //console.error(chalk.red(`failed:`), err)
                         });
                 } else {
                     debug(`GIT remote is not set @ ${dir}`)
