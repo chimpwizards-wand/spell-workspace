@@ -61,7 +61,7 @@ export class Clone extends Command  {
             baseDir: target,
             binary: 'git',
             maxConcurrentProcesses: 6,
-            config: []
+            //config: []
          };
         const GIT: SimpleGit = simpleGit(options);
 
