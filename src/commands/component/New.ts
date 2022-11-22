@@ -40,8 +40,14 @@ export class New extends Command  {
     @CommandParameter({ description: 'Prefix the git repository with the contet name', alias: 'p', defaults: false})
     prefix: boolean = false;
 
-    @CommandParameter({ description: 'Template to use to scaffold the component', alias: 't', defaults: "react"})
+    @CommandParameter({ description: 'Component namespace ', alias: 's',})
+    namespace: string = "";
+
+    @CommandParameter({ description: 'Template to use to scaffold the component', alias: 'm'})
     template: string = "";
+
+    @CommandParameter({ description: 'Comma separated list of tags to classify the component', alias: 't'})
+    tags: string = "";
 
 
     execute(yargs: any): void {

@@ -38,6 +38,11 @@ export class New extends Command  {
     @CommandParameter({ description: 'Location to keep the new components', alias: 'l',})
     location: string = "";
 
+    @CommandParameter({ description: 'Default namespace for new components on this workspace', alias: 's',})
+    namespace: string = "";
+
+    @CommandParameter({ description: 'Template to use to scaffold the workspace', alias: 'm'})
+    template: string = "";
 
     execute(yargs: any): void {
         debug(`Workspace ${this.name}`)
